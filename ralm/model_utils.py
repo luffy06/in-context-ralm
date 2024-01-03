@@ -12,6 +12,7 @@ def load_tokenizer(model_name):
 def load_model_and_tokenizer(model_name, model_parallelism=False, cache_dir=None, auth_token=None):
     device = "cuda" if torch.cuda.is_available() else "cpu"
     device_count = torch.cuda.device_count()
+    print(f"Device: {device}\nDevice count: {device_count}")
 
     config = AutoConfig.from_pretrained(model_name)
     model_args = {}
