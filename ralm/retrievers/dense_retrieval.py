@@ -20,12 +20,13 @@ class DenseRetriever(BaseRetriever):
         forbidden_titles_path, 
         encoder, 
         retriever_dir, 
+        corpus_size,
         nprobe, 
         device_id=-1, 
         index_path=None
     ):
         super(DenseRetriever, self).__init__(tokenizer=tokenizer)
-        self._set_searcher(index_name, encoder, retriever_dir, nprobe, device_id, index_path)
+        self._set_searcher(index_name, encoder, retriever_dir, corpus_size, nprobe, device_id, index_path)
         self.num_tokens_for_query = num_tokens_for_query
 
         self.forbidden_titles = self._get_forbidden_titles(forbidden_titles_path)
@@ -35,24 +36,28 @@ class DenseRetriever(BaseRetriever):
         index_name, 
         encoder, 
         retriever_dir, 
+        corpus_size,
         nprobe, 
         device_id=-1, 
         index_path=None
     ):
         with open(os.path.join(retriever_dir, "metadata.json"), "r") as fin:
             self.metadata = json.load(fin)
-        db_path = self.metadata["db_path"] if "db_path" in self.metadata else os.path.join(retriever_dir, "db")
+        db_path = self.metadata["db_path"] if "db_path" in self.metadata else os.path.join(retriever_dir, os.path.join("db", corpus_size))
         if index_path == None:
             if "index_path" in self.metadata:
                 index_path = self.metadata["index_path"]
             else:
-                index_dir = os.path.join(retriever_dir, "index")
+                index_dir = os.path.join(retriever_dir, os.path.join("index", corpus_size))
                 index_path_list = glob(os.path.join(index_dir, "*.index"))
-                for index_path_i in index_path_list:
-                    name = index_path_i.split("/")[-1].split(".")[0]
-                    if index_name == name:
-                        index_path = index_path_i
-                        break
+                if index_name != None:
+                    for index_path_i in index_path_list:
+                        name = index_path_i.split("/")[-1].split(".")[0]
+                        if index_name == name:
+                            index_path = index_path_i
+                            break
+                else:
+                    index_path = index_path_list[0]
                 assert index_path != None
         
         self.index = faiss.read_index(index_path, faiss.IO_FLAG_MMAP)

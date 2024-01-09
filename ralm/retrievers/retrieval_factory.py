@@ -7,11 +7,12 @@ def add_retriever_args(parser, retriever_type):
         parser.add_argument("--forbidden_titles_path", type=str, default="ralm/retrievers/wikitext103_forbidden_titles.txt")
 
     elif retriever_type == "dense":
-        parser.add_argument("--index_name", type=str, default="ivf65536-hnsw32-pq64")
+        parser.add_argument("--index_name", type=str, default=None)
         parser.add_argument("--num_tokens_for_query", type=int, default=32)
         parser.add_argument("--forbidden_titles_path", type=str, default="ralm/retrievers/wikitext103_forbidden_titles.txt")
         parser.add_argument("--encoder_name", type=str, default="bert-base-uncased")
         parser.add_argument("--retriever_dir", type=str, default="metadata/wikitext103-bert-base")
+        parser.add_argument("--corpus_size", type=str, default='100K')
         parser.add_argument("--nprobe", type=int, default=512)
         parser.add_argument("--device_id", type=int, default=-1)
         parser.add_argument("--index_path", type=str, default=None)
@@ -39,6 +40,7 @@ def get_retriever(retriever_type, args, tokenizer):
             forbidden_titles_path=args.forbidden_titles_path,
             encoder=encoder,
             retriever_dir=args.retriever_dir,
+            corpus_size=args.corpus_size,
             nprobe=args.nprobe,
             device_id=args.device_id,
             index_path=args.index_path,
