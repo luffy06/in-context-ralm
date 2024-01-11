@@ -1,7 +1,7 @@
-DEVICE=1
+DEVICE=0
 PROJECT_DIR=/disk3/xy/PROJECT/wsy/in-context-ralm
-MODEL_PATH=/disk3/xy/LM/opt-13b
-OUTPUT_DIR=$PROJECT_DIR/opt-13b-no-retrieval
+MODEL_PATH=/disk3/xy/LM/opt-1.3b
+OUTPUT_DIR=$PROJECT_DIR/opt-1.3b-no-retrieval
 
 if [[ -d $OUTPUT_DIR ]]; then
   rm -rf $OUTPUT_DIR
