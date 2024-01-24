@@ -8,20 +8,23 @@ from tqdm import tqdm
 from transformers import AutoTokenizer
 
 from ralm.file_utils import print_args
+from ralm.model_utils import load_model_and_tokenizer
 from ralm.retrievers.retrieval_factory import add_retriever_args, get_retriever
 
 RETRIEVAL_TYPES = [
     "dense",
     "sparse",
+    "exact",
 ]
-
 
 def main(args):
     # Dump args
     print_args(args, output_file=args.output_file.replace(".json", ".args.txt"))
 
     print("Loading tokenizer...")
-    tokenizer = AutoTokenizer.from_pretrained(args.tokenizer_name)
+    model, tokenizer, config, device = load_model_and_tokenizer(
+        args.tokenizer_name, model_parallelism=args.model_parallelism, cache_dir=args.cache_dir, auth_token=args.auth_token
+    )
 
     print("Loading dataset...")
     if args.load_from == "hf":
@@ -45,12 +48,11 @@ def main(args):
         end_loc = min(begin_loc + args.max_length, dataset_len)
         target_begin_loc = prev_end_loc
 
-        # d = retriever.retrieve(encodings.input_ids, target_begin_loc, end_loc, title=None)
-
         d = {
-            "begin_location": target_begin_loc,
+            "begin_location": begin_loc,
+            "target_begin_location": target_begin_loc,
             "end_location": end_loc,
-            "future": tokenizer.decode(encodings.input_ids[0, target_begin_loc:end_loc])
+            "labels": tokenizer.decode(encodings.input_ids[0, target_begin_loc:end_loc])
         }
 
         data.append(d)
@@ -94,6 +96,9 @@ if __name__ == '__main__':
     parser.add_argument("--tokenizer_name", type=str, default="gpt2")
     parser.add_argument("--max_length", type=int, default=1024)
     parser.add_argument("--stride", type=int, default=32)
+    parser.add_argument("--cache_dir", type=str, default=None)
+    parser.add_argument("--model_parallelism", action="store_true")
+    parser.add_argument("--auth_token", type=str, default=None)
 
     # Retrieval params
     parser.add_argument("--retrieval_type", required=True, choices=RETRIEVAL_TYPES)

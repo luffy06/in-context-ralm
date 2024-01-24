@@ -5,7 +5,11 @@ def add_retriever_args(parser, retriever_type):
         parser.add_argument("--index_name", type=str, default="wikipedia-dpr")
         parser.add_argument("--num_tokens_for_query", type=int, default=32)
         parser.add_argument("--forbidden_titles_path", type=str, default="ralm/retrievers/wikitext103_forbidden_titles.txt")
-
+    
+    elif retriever_type == "exact":
+        parser.add_argument("--num_tokens_for_query", type=int, default=32)
+        parser.add_argument("--forbidden_titles_path", type=str, default="ralm/retrievers/wikitext103_forbidden_titles.txt")
+    
     elif retriever_type == "dense":
         parser.add_argument("--index_name", type=str, default=None)
         parser.add_argument("--num_tokens_for_query", type=int, default=32)
@@ -16,7 +20,6 @@ def add_retriever_args(parser, retriever_type):
         parser.add_argument("--nprobe", type=int, default=512)
         parser.add_argument("--device_id", type=int, default=-1)
         parser.add_argument("--index_path", type=str, default=None)
-
     else:
         raise ValueError
 
@@ -27,6 +30,13 @@ def get_retriever(retriever_type, args, tokenizer):
         return SparseRetriever(
             tokenizer=tokenizer,
             index_name=args.index_name,
+            forbidden_titles_path=args.forbidden_titles_path,
+            num_tokens_for_query=args.num_tokens_for_query,
+        )
+    elif retriever_type == "exact":
+        from ralm.retrievers.exact_retrieval import ExactRetriever
+        return ExactRetriever(
+            tokenizer=tokenizer,
             forbidden_titles_path=args.forbidden_titles_path,
             num_tokens_for_query=args.num_tokens_for_query,
         )

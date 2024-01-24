@@ -102,10 +102,11 @@ class DenseRetriever(BaseRetriever):
             prev_k = k
             k *= 2
 
-    def _get_query_string(self, sequence_input_ids, target_begin_location, target_end_location, title=None):
+    def _get_query_string(self, sequence_input_ids, begin_location, target_begin_location, end_location, title=None):
         # We isolate the prefix to make sure that we don't take tokens from the future:
-        prefix_tokens = sequence_input_ids[0, :target_begin_location]
-        query_tokens = prefix_tokens[-self.num_tokens_for_query:]
+        query_tokens = sequence_input_ids[0, begin_location:target_begin_location]
+        if self.num_tokens_for_query > 0:
+            query_tokens = query_tokens[-self.num_tokens_for_query:]
         query_str = self.tokenizer.decode(query_tokens)
         return query_str
 
@@ -114,6 +115,7 @@ class DenseRetriever(BaseRetriever):
             self._get_query_string(
                 sequence_input_ids,
                 d["begin_location"],
+                d["target_begin_location"],
                 d["end_location"],
                 d["title"] if "title" in d else None
             )
